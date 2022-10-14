@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">AnimeApp</string>
+    <string name="seeing">Viendo</string>
+    <string name="pendent">Pendientes</string>
+    <string name="seen">Visto</string>
+    <string name="name">Nombre</string>
+    <string name="addAnime">Nuevo anime</string>
+    <string name="season">Temporadas</string>
+    <string name="modify">Modificar</string>
+    <string name="delete">Eliminar</string>
+    <string name="deleteTitle">Eliminar elemento</string>
+    <string name="deleteItem">El elemento se eliminara para siempre</string>
+    <string name="deleteRange">Se eliminaran todos los elementos siguientes incluido ese</string>
+    <string name="confirmDelete">Eliminar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="save">Guardar</string>
+    <string name="search">Buscar</string>
+    <string name="newSeason">Nueva Temporada</string>
+    <string name="currentChapterNumber">Numero actual de capitulos:</string>
+    <string name="number">Nuevo numero de capitulos</string>
+    <string name="addSeason">Nueva temporada</string>
+    <string name="episodes">Episodios</string>
+    <string name="all">Todos</string>
+    <string name="modifyanime">Modificar Anime</string>
+    <string name="modifyseason">Modificar Temporada</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string-array name="numbers">
+        <item>0</item>
+    </string-array>
+</resources>

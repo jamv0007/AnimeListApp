@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/flayoutSeason"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@drawable/bottom_sheet_dialog">
+
+        <View
+            android:layout_width="70dp"
+            android:layout_height="3dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="10dp"
+            android:background="@android:color/darker_gray">
+        </View>
+
+        <TextView
+            android:id="@+id/nameSeason"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:maxLength="50"
+            android:text=""
+            android:textAlignment="center">
+        </TextView>
+
+        <Button
+            android:id="@+id/modifySeason"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:drawableLeft="@drawable/ic_baseline_edit_24"
+            android:drawablePadding="20dp"
+            android:paddingLeft="25dp"
+            android:text="@string/modify"
+            android:textAlignment="viewStart"
+            app:iconPadding="25dp">
+        </Button>
+
+        <Button
+            android:id="@+id/deleteSeason"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:drawableLeft="@drawable/ic_baseline_delete_24"
+            android:drawablePadding="20dp"
+            android:paddingLeft="25dp"
+            android:text="@string/delete"
+            android:textAlignment="viewStart"
+            app:iconPadding="25dp">
+        </Button>
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/FLEpisodios"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gris"
+    tools:context=".SeasonList">
+
+    <ImageView
+        android:id="@+id/animeEpisodeImage"
+        android:layout_width="412dp"
+        android:layout_height="244dp"
+        android:layout_gravity="top"
+        android:scaleType="centerCrop"
+        tools:srcCompat="@drawable/defaultphoto"></ImageView>
+
+    <TextView
+        android:id="@+id/animeEpisodeNameView"
+        android:layout_width="match_parent"
+        android:layout_height="244dp"
+        android:layout_marginTop="0dp"
+        android:background="@color/negroTransparente"
+        android:gravity="center"
+        android:maxLength="50"
+        android:text="fff"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"></TextView>
+
+
+    <TextView
+        android:id="@+id/epListTempoNumber"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:text="ffff"
+        android:layout_marginTop="150dp"/>
+
+    <EditText
+        android:id="@+id/paraBuscar"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="254dp"
+        android:background="@drawable/searchbackground"
+        android:drawableLeft="@drawable/ic_baseline_search_24"
+        android:drawableRight="@drawable/ic_baseline_cancel_24"
+        android:drawablePadding="10dp"
+        android:gravity="center_vertical"
+        android:hint="Buscar episodio"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:text=""
+        android:textColor="@color/gris"
+        android:textColorHint="@color/grisClaro"></EditText>
+
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="wrap_content"
+        android:layout_height="1dp"
+        android:layout_marginTop="314dp"
+        android:background="@color/negroSeparador" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/episodeList"
+        android:layout_width="409dp"
+        android:layout_height="415dp"
+        android:layout_marginTop="314dp" />
+</FrameLayout>
