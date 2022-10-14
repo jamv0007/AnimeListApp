@@ -5,6 +5,7 @@
       <map>
         <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.233" />
         <entry key="app/src/main/res/drawable/bottom_sheet_dialog.xml" value="0.233" />
+        <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.277" />
         <entry key="app/src/main/res/drawable/searchbackground.xml" value="0.431" />
         <entry key="app/src/main/res/drawable/splashscreen.xml" value="0.233" />
         <entry key="app/src/main/res/layout/activity_add_anime.xml" value="0.33061594202898553" />
@@ -21,6 +22,8 @@
         <entry key="app/src/main/res/menu/menu_lista_anime.xml" value="0.35260416666666666" />
         <entry key="app/src/main/res/menu/menu_lista_episodio.xml" value="0.35260416666666666" />
         <entry key="app/src/main/res/menu/menu_lista_temporada.xml" value="0.35260416666666666" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.277" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.277" />
       </map>
     </option>
   </component>
