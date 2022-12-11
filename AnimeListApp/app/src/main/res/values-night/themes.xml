@@ -20,6 +20,17 @@
         <item name="android:color">@color/amarillo</item>
     </style>
 
+    <style name="BotonDesplegableOrdenar" parent="android:style/Widget.Holo.Light.ActionButton.Overflow">
+        <item name="android:src">@drawable/ic_baseline_sort_24</item>
+        <item name="android:background">?android:attr/actionBarItemBackground</item>
+        <item name="android:contentDescription">"Ordenar"</item>
+    </style>
+
+    <style name="BotonDesplegableExportar" parent="android:style/Widget.Holo.Light.ActionButton.Overflow">
+        <item name="android:src">@drawable/ic_baseline_import_export_24</item>
+        <item name="android:background">?android:attr/actionBarItemBackground</item>
+        <item name="android:contentDescription">"Importar y Exportar"</item>
+    </style>
 
 
 </resources>

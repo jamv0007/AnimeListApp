@@ -5,6 +5,8 @@
       <map>
         <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.233" />
         <entry key="app/src/main/res/drawable/bottom_sheet_dialog.xml" value="0.233" />
+        <entry key="app/src/main/res/drawable/ic_baseline_import_export_24.xml" value="0.47" />
+        <entry key="app/src/main/res/drawable/ic_baseline_search_24.xml" value="0.47" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.277" />
         <entry key="app/src/main/res/drawable/searchbackground.xml" value="0.431" />
         <entry key="app/src/main/res/drawable/splashscreen.xml" value="0.233" />
@@ -19,6 +21,7 @@
         <entry key="app/src/main/res/layout/elemento_lista_episodio.xml" value="0.33061594202898553" />
         <entry key="app/src/main/res/layout/elemento_lista_temporada.xml" value="0.33061594202898553" />
         <entry key="app/src/main/res/menu/add_menu.xml" value="0.35260416666666666" />
+        <entry key="app/src/main/res/menu/menu_export_import.xml" value="0.7223958333333333" />
         <entry key="app/src/main/res/menu/menu_lista_anime.xml" value="0.35260416666666666" />
         <entry key="app/src/main/res/menu/menu_lista_episodio.xml" value="0.35260416666666666" />
         <entry key="app/src/main/res/menu/menu_lista_temporada.xml" value="0.35260416666666666" />

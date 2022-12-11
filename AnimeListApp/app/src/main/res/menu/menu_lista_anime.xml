@@ -1,22 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:id="@+id/todo"
-        android:title="@string/all">
-    </item>
-    <item
-        android:id="@+id/pendientes"
-        android:title="@string/pendent">
-    </item>
-    <item
-        android:id="@+id/viendo"
-        android:title="@string/seeing">
-    </item>
-    <item
-        android:id="@+id/visto"
-        android:title="@string/seen">
+
+    <item android:icon="@drawable/ic_baseline_sort_24"
+        android:title="Ordenar"
+        app:showAsAction="always">
+        <menu>
+            <item
+                android:id="@+id/todo"
+                android:title="@string/all">
+            </item>
+            <item
+                android:id="@+id/pendientes"
+                android:title="@string/pendent">
+            </item>
+            <item
+                android:id="@+id/viendo"
+                android:title="@string/seeing">
+            </item>
+            <item
+                android:id="@+id/visto"
+                android:title="@string/seen">
+            </item>
+        </menu>
+
     </item>
 
+
+
 </menu>
+
 

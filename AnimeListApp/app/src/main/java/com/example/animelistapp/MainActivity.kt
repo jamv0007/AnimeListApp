@@ -1,31 +1,41 @@
 package com.example.animelistapp
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.app.AlertDialog
 import android.content.ContentValues
+import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
+import android.text.Html
 import android.text.TextWatcher
 import android.view.*
-import androidx.preference.PreferenceManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
-import android.widget.SearchView
-import android.widget.SearchView.OnQueryTextListener
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.animelistapp.Adaptadores.AdaptadorListaAnime
 import com.example.animelistapp.Clases.Anime
-import com.example.animelistapp.Clases.Episodio
 import com.example.animelistapp.Clases.Temporada
 import com.example.animelistapp.databinding.ActivityMainBinding
+import kotlinx.coroutines.*
 import java.io.File
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executor
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+
 
 enum class Mostrado{
     TODO,
@@ -43,7 +53,10 @@ class MainActivity : AppCompatActivity(), BottomSheet.BottomSheetListener{
     private lateinit var adaptador: AdaptadorListaAnime
     private lateinit var binding: ActivityMainBinding
     private var textoBusqueda: String = ""
+    private var archivoSeleccionadoImportar: String = ""
     private var contadorId: Long = 0
+    private var temporadaId: Long = 0
+    private var capituloId: Long = 0
     private val addResponderLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result ->
         if(result.resultCode == 2){
             var name: String = result.data?.getStringExtra("ANIME_NAME").orEmpty();
@@ -95,29 +108,132 @@ class MainActivity : AppCompatActivity(), BottomSheet.BottomSheetListener{
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
+    @RequiresApi(Build.VERSION_CODES.N)
+    private val importResponderLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result ->
+        if (result.resultCode == RESULT_OK){
+            val uri: Uri = result.data!!.data!!
+            archivoSeleccionadoImportar = uri.toString()
+            val separador = archivoSeleccionadoImportar.split("/")
+            val extension = separador[separador.size-1].split(".")
+            if(extension[extension.size-1] !="csv"){
+                archivoSeleccionadoImportar = ""
+                Toast.makeText(applicationContext,"El archivo no tiene extension csv",Toast.LENGTH_LONG).show()
+            }else{
+
+                var dialog: AlertDialog.Builder = AlertDialog.Builder(this)
+                var acept: Boolean = false;
+
+                dialog.setOnDismissListener {
+                    if(acept) {
+
+                        val loadMessaje: AlertDialog.Builder = AlertDialog.Builder(this)
+                        loadMessaje.setCancelable(false)
+                        loadMessaje.setView(R.layout.load_bar)
+                        val alert = loadMessaje.create()
+                        alert.show()
+
+                       GlobalScope.launch(Dispatchers.Main) {
+
+                           withContext(Dispatchers.IO){
+                               importarYCargarDatos(uri)
+                           }
+
+                           alert.dismiss()
+                           selecionarDatos()
+                           adaptador.notifyDataSetChanged()
+                       }
+                        acept = false;
+                    }
+                }
+
+                dialog.setMessage(resources.getString(R.string.textImport));
+                dialog.setTitle(resources.getString(R.string.impor));
+
+                dialog.setNegativeButton(
+                    Html.fromHtml("<font color='#109DFA'>"+resources.getString(R.string.cancel)+"</font>",
+                        Html.FROM_HTML_MODE_LEGACY),
+                    DialogInterface.OnClickListener{ dialogInterface, i ->
+                })
+
+                dialog.setPositiveButton(
+                    Html.fromHtml("<font color='#EF280F'>"+resources.getString(R.string.impor)+"</font>",
+                        Html.FROM_HTML_MODE_LEGACY),
+                    DialogInterface.OnClickListener{ dialogInterface, b ->
+                    acept = true;
+
+                })
+
+                dialog.show();
+
+
+
+            }
+
+        }
+    }
+
+
+    private fun importarYCargarDatos(uri: Uri){
+
+        for (i: Int in 0..datos.size - 1) {
+            UsoImagen.borrarArchivo(filesDir.toString() + datos[i].nombre)
+        }
+
+        UsoBase.importarDatosCSV(applicationContext, uri, filesDir.toString())
+
+        datos.clear()
+
+        datos = UsoBase.cargarDatos(applicationContext).clone() as ArrayList<Anime>
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        //cargarDatos()
-        datos = UsoBase.cargarDatos(this).clone() as ArrayList<Anime>
-        getNombres()
-        adaptador = AdaptadorListaAnime(datosMostrados, { anime,pos -> accederAnime(anime,pos) },{anime, pos -> menuDesplegable(anime,pos) })
-        selecionarDatos()
-        iniciarRecyclerView()
+        binding.progressBar.visibility = View.GONE
+        val context: Context = this
 
+        val loadMessaje: AlertDialog.Builder = AlertDialog.Builder(this)
+        loadMessaje.setCancelable(false)
+
+        loadMessaje.setView(R.layout.load_data_bar)
+
+        val alert = loadMessaje.create()
+        alert.show()
+
+        GlobalScope.launch(Dispatchers.Main) {
+
+            withContext(Dispatchers.IO){
+                datos = UsoBase.cargarDatos(context).clone() as ArrayList<Anime>
+            }
+
+            alert.dismiss()
+
+            getNombres()
+
+            selecionarDatos()
+
+        }
+
+        adaptador = AdaptadorListaAnime(datosMostrados, { anime,pos -> accederAnime(anime,pos) },{anime, pos -> menuDesplegable(anime,pos) })
+        iniciarRecyclerView()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
 
         var inflater: MenuInflater = menuInflater
+
+        inflater.inflate(R.menu.menu_export_import,menu)
         inflater.inflate(R.menu.menu_lista_anime,menu)
 
         return super.onCreateOptionsMenu(menu)
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
         val id = item.itemId
@@ -143,6 +259,21 @@ class MainActivity : AppCompatActivity(), BottomSheet.BottomSheetListener{
                 selecionarDatos()
             }
 
+            R.id.exportar -> {
+                UsoBase.exportarDatosCSV(applicationContext,contadorId,temporadaId,capituloId,filesDir.toString())
+            }
+
+            R.id.importar -> {
+
+
+                var chooseFile = Intent(Intent.ACTION_GET_CONTENT)
+                chooseFile.type = "*/*"
+                chooseFile = Intent.createChooser(chooseFile, "Choose a file")
+                importResponderLauncher.launch(chooseFile)
+
+
+            }
+
         }
 
 
@@ -158,14 +289,14 @@ class MainActivity : AppCompatActivity(), BottomSheet.BottomSheetListener{
         editor.commit()
 
 
-        println("En pause: " + contadorId)
     }
 
     override fun onResume() {
         super.onResume()
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         contadorId = sharedPreferences.getLong("ID_ANIME",0)
-        println("En resume: " + contadorId)
+        temporadaId = sharedPreferences.getLong("ID_TEMPORADA",0)
+        capituloId = sharedPreferences.getLong("ID_EPISODIO",0)
 
     }
 
@@ -327,7 +458,9 @@ class MainActivity : AppCompatActivity(), BottomSheet.BottomSheetListener{
 
     override fun onChangeButtonClicked(anime: Anime, pos: Int) {
         datos[pos].nombre = anime.nombre
-        datos[pos].imagen = anime.imagen
+        datos[pos].imagen = Uri.parse(anime.imagen.toString())
+
+
         //UsoImagen.guardarImagen(filesDir.toString() + anime.nombre,anime.imagen,applicationContext)
         selecionarDatos()
         getNombres()
@@ -335,6 +468,11 @@ class MainActivity : AppCompatActivity(), BottomSheet.BottomSheetListener{
         contentValues.put("nombre",anime.nombre)
         contentValues.put("imagen",anime.imagen.toString())
         UsoBase.modificarAnime(this,"anime",contentValues,"id="+anime.id)
+
+        binding.listaAnime.adapter = null
+        binding.listaAnime.adapter = adaptador
+
+        adaptador.notifyDataSetChanged()
     }
 
     override fun onDeleteButtonClicked(anime: Anime, pos: Int) {
@@ -345,7 +483,6 @@ class MainActivity : AppCompatActivity(), BottomSheet.BottomSheetListener{
         UsoBase.borrarAnime(this,"temporada","anime_clave="+anime.id)
         UsoBase.borrarAnime(this,"anime","id="+datos[pos].id)
         UsoImagen.borrarArchivo(filesDir.toString() + datos[pos].nombre)
-
         datos.removeAt(pos)
         selecionarDatos()
         getNombres()

@@ -23,6 +23,14 @@
     <string name="all">Todos</string>
     <string name="modifyanime">Modificar Anime</string>
     <string name="modifyseason">Modificar Temporada</string>
+    <string name="export">Exportar</string>
+    <string name="impor">Importar</string>
+    <string name="textImport">Se eliminará todo lo que hay actualmente en la aplicación</string>
+    <string name="loadText">Importando datos...</string>
+    <string name="loadData">Cargando datos...</string>
+    <string name="createSeason">Creando temporada...</string>
+    <string name="modifySeason">Actualizando temporada...</string>
+    <string name="deleteSeason">Borrando temporadas...</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string-array name="numbers">

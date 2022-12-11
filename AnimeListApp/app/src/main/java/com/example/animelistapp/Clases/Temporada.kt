@@ -11,7 +11,8 @@ class Temporada(
     id: Long,
     numeroTemporada: Int,
     finalizada: Boolean,
-    episodios: ArrayList<Episodio>
+    episodios: ArrayList<Episodio>,
+    animeId: Long
 ): Parcelable {
 
     var id: Long = id
@@ -26,7 +27,9 @@ class Temporada(
     var episodios: ArrayList<Episodio> = episodios
                 get() = field
                 set(value) { field = value }
-
+    var animeId: Long = animeId
+                get() = field
+                set(value) { field = value }
 
 
     fun addEpisode(episodio: Episodio){
@@ -44,7 +47,7 @@ class Temporada(
 
 
     @RequiresApi(Build.VERSION_CODES.Q)
-    constructor(parcel: Parcel) : this(parcel.readLong(),parcel.readInt(), parcel.readBoolean(),parcel.createTypedArrayList(Episodio.CREATOR)!!) {
+    constructor(parcel: Parcel) : this(parcel.readLong(),parcel.readInt(), parcel.readBoolean(),parcel.createTypedArrayList(Episodio.CREATOR)!!,parcel.readLong()) {
 
     }
 
@@ -53,6 +56,7 @@ class Temporada(
         parcel.writeInt(numeroTemporada)
         parcel.writeByte(if (finalizada) 1 else 0)
         parcel.writeTypedArray(episodios.toTypedArray(),0)
+        parcel.writeLong(animeId)
     }
 
     override fun describeContents(): Int {

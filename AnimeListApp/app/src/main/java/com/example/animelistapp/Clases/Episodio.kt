@@ -8,7 +8,8 @@ import androidx.annotation.RequiresApi
 class Episodio(
     id: Long,
     numeroEpisodio: Int,
-    visto: Boolean
+    visto: Boolean,
+    temporadaId: Long
 ): Parcelable {
 
     var id: Long = id
@@ -20,17 +21,21 @@ class Episodio(
     var visto: Boolean = visto
                 get() = field
                 set(value) { field = value}
+    var temporadaId: Long = temporadaId
+                get() = field
+                set(value) { field = value }
 
 
 
     @RequiresApi(Build.VERSION_CODES.Q)
-    constructor(parcel: Parcel) : this(parcel.readLong(),parcel.readInt(), parcel.readBoolean()) {
+    constructor(parcel: Parcel) : this(parcel.readLong(),parcel.readInt(), parcel.readBoolean(),parcel.readLong()) {
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeLong(id)
         parcel.writeInt(numeroEpisodio)
         parcel.writeByte(if (visto) 1 else 0)
+        parcel.writeLong(temporadaId)
     }
 
     override fun describeContents(): Int {
