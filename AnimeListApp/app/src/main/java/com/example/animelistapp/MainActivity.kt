@@ -7,6 +7,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -22,6 +23,8 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.documentfile.provider.DocumentFile
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -35,6 +38,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.jar.Manifest
 
 
 enum class Mostrado{
@@ -107,6 +111,7 @@ class MainActivity : AppCompatActivity(), BottomSheet.BottomSheetListener{
 
         }
     }
+
 
     @OptIn(DelicateCoroutinesApi::class)
     @RequiresApi(Build.VERSION_CODES.N)
@@ -260,7 +265,7 @@ class MainActivity : AppCompatActivity(), BottomSheet.BottomSheetListener{
             }
 
             R.id.exportar -> {
-                UsoBase.exportarDatosCSV(applicationContext,contadorId,temporadaId,capituloId,filesDir.toString())
+                UsoBase.exportarDatosCSV(applicationContext,contadorId,temporadaId,capituloId)
             }
 
             R.id.importar -> {

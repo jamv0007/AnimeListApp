@@ -7,7 +7,9 @@ import android.database.sqlite.SQLiteDatabase
 import android.net.Uri
 import android.os.Environment
 import android.widget.Toast
+import androidx.core.net.toFile
 import androidx.core.net.toUri
+import androidx.documentfile.provider.DocumentFile
 import com.example.animelistapp.Clases.Anime
 import com.example.animelistapp.Clases.Episodio
 import com.example.animelistapp.Clases.Temporada
@@ -24,6 +26,7 @@ object UsoBase {
         val base: SQLiteDatabase = admin.writableDatabase
         base.insert(tabla,null,content)
         base.close()
+        admin.close()
 
     }
 
@@ -33,7 +36,7 @@ object UsoBase {
         val base: SQLiteDatabase = admin.writableDatabase
         base.delete(tabla,clausula,null)
         base.close()
-
+        admin.close()
     }
 
     public fun modificarAnime(context: Context,tabla: String,content: ContentValues,clausula: String){
@@ -41,6 +44,7 @@ object UsoBase {
         val base: SQLiteDatabase = admin.writableDatabase
         base.update(tabla,content,clausula,null)
         base.close()
+        admin.close()
     }
 
 
@@ -109,29 +113,18 @@ object UsoBase {
         cursor.close()
         cursor2.close()
         cursor3.close()
-
+        admin.close()
 
         return animeLista;
 
     }
 
-    public fun exportarDatosCSV(context: Context,idAnime: Long, idTemporada: Long, idCapitulo: Long,localizacion: String){
+    public fun exportarDatosCSV(context: Context,idAnime: Long, idTemporada: Long, idCapitulo: Long){
 
+        var root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+        var file = File(root,"DatosApp.csv")
+        val filewriter: FileWriter = FileWriter(file)
 
-        val carpeta: File = File(localizacion + "/AnimeAppList")
-
-        var creada: Boolean = false
-        if(!carpeta.exists()){
-            creada = carpeta.mkdir()
-        }
-
-        val archivo: String = carpeta.toString() + "/DatosAplicacion.csv"
-
-        val file: File = File(archivo)
-
-        file.createNewFile()
-
-        val filewriter: FileWriter = FileWriter(archivo)
         val admin = AdminSQLite(context,"administracion",null,1)
         val base: SQLiteDatabase = admin.writableDatabase
 
@@ -190,8 +183,11 @@ object UsoBase {
         filewriter.close()
 
         base.close()
+        admin.close()
 
-        Toast.makeText(context,"Se ha exportado a " + archivo,Toast.LENGTH_LONG).show()
+
+
+        Toast.makeText(context,"Se ha exportado al directorio de Documentos",Toast.LENGTH_LONG).show()
 
     }
 
@@ -209,6 +205,7 @@ object UsoBase {
         base.delete("episodio",null,null)
 
         base.close()
+        admin.close()
 
         //Se lee el fichero
         var linea: String = "Inicio"
