@@ -39,7 +39,7 @@ class Temporada(
     fun removeRangeEpisode(ini: Int,context: Context){
 
         for(i: Int in episodios.size-1 downTo ini){
-            UsoBase.borrarAnime(context,"episodio","id="+episodios[episodios.size-1].id)
+            UsoBase.borrar(context,"episodio","id="+episodios[episodios.size-1].id)
             episodios.removeAt(episodios.size-1);
         }
 

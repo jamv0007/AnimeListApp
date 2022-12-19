@@ -12,8 +12,6 @@ import android.text.TextWatcher
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
-import android.widget.SearchView
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import androidx.preference.PreferenceManager
@@ -32,16 +30,18 @@ import kotlinx.coroutines.withContext
 
 class SeasonList : AppCompatActivity(),BottomSheetTemporada.ModifiedSeason,ViewHolderListaTemporada.SwitchSeasonChecked {
 
-    private lateinit var binding: ActivitySeasonListBinding
-    private lateinit var adaptador: AdaptadorListaTemporada
-    private lateinit var anime: Anime
-    private var datosMostrados: ArrayList<Pair<Int,Temporada>> = arrayListOf()
-    private var posicionAnime: Int = -1
-    private var textoBusqueda: String = ""
-    private var temporadaId: Long = 0
-    private var capituloId: Long = 0
+    private lateinit var binding: ActivitySeasonListBinding//Binding a los elementos de la interfaz
+    private lateinit var adaptador: AdaptadorListaTemporada//Adaptador del recycler view
+    private lateinit var anime: Anime//Datos pasados del main
+    private var datosMostrados: ArrayList<Pair<Int,Temporada>> = arrayListOf()//Datos mostrados en el recycler view
+    private var posicionAnime: Int = -1//Posicion del dato en los datos globales del main
+    private var textoBusqueda: String = ""//Texto de busqueda
+    private var temporadaId: Long = 0//Id actual de la temporada
+    private var capituloId: Long = 0//Id actual del capitulo
+    //Responder al añadir temporada
     private val addSeasonResponderLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if(result.resultCode == 5){
+            //Se recoge numero de episodios  y se actualiza la base de datos
             val number = result.data?.getIntExtra("CHAPTERNUMBER",0)
             var episodios: ArrayList<Episodio> = arrayListOf()
             val cv = ContentValues()
@@ -51,7 +51,7 @@ class SeasonList : AppCompatActivity(),BottomSheetTemporada.ModifiedSeason,ViewH
             cv.put("anime_clave",anime.id)
 
             val context: Context = this
-
+            //Se realiza inserccion en base de datos
             val loadMessaje: AlertDialog.Builder = AlertDialog.Builder(this)
             loadMessaje.setCancelable(false)
 
@@ -63,7 +63,7 @@ class SeasonList : AppCompatActivity(),BottomSheetTemporada.ModifiedSeason,ViewH
             GlobalScope.launch(Dispatchers.Main) {
 
                 withContext(Dispatchers.IO){
-                    UsoBase.insertarAnime(context,"temporada",cv)
+                    UsoBase.insertar(context,"temporada",cv)
 
 
                     for(i: Int in 0 until number!!){
@@ -73,7 +73,7 @@ class SeasonList : AppCompatActivity(),BottomSheetTemporada.ModifiedSeason,ViewH
                         contentValues.put("numero",episodios[episodios.size-1].numeroEpisodio)
                         contentValues.put("visto",episodios[episodios.size-1].visto)
                         contentValues.put("temporada_clave",temporadaId)
-                        UsoBase.insertarAnime(context,"episodio",contentValues)
+                        UsoBase.insertar(context,"episodio",contentValues)
                         capituloId++
                     }
                 }
@@ -98,12 +98,15 @@ class SeasonList : AppCompatActivity(),BottomSheetTemporada.ModifiedSeason,ViewH
         }
 
     }
+    //Responder de la lista de episodios
     private val episodeListResponderLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result ->
         if(result.resultCode == 7){
+            //Se recibe la posicion, los datos y la posicion en el view
             val posicionTemporada = result.data?.getIntExtra("TEMPORADA",0)
             val datos = result.data?.getParcelableExtra<Anime>("DATOS")
             val viewPos = result.data?.getIntExtra("VIEWPOS",0)
 
+            //Se actualiza y se recarga la vista
             anime.temporadas[posicionTemporada!!] = datos!!.temporadas[posicionTemporada]
 
             cambiarActivo()
@@ -117,10 +120,12 @@ class SeasonList : AppCompatActivity(),BottomSheetTemporada.ModifiedSeason,ViewH
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //Se instancia el binding
         binding = ActivitySeasonListBinding.inflate(layoutInflater)
         setContentView(binding.root)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true);
         supportActionBar!!.setTitle(resources.getString(R.string.season));
+        //Se reciben los datos de la actividad anterior(main)
         posicionAnime = intent.getIntExtra("POSITION", -1)
         anime = intent.getParcelableExtra("ELEMENT")!!
         elegirDatos()
@@ -136,7 +141,7 @@ class SeasonList : AppCompatActivity(),BottomSheetTemporada.ModifiedSeason,ViewH
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-
+        //Al pulsar la flecha ahacia atras regresa los datos
         when(item.itemId){
             android.R.id.home -> {
                 var intent: Intent = Intent();
@@ -155,6 +160,7 @@ class SeasonList : AppCompatActivity(),BottomSheetTemporada.ModifiedSeason,ViewH
 
     override fun onPause() {
         super.onPause()
+        //Al poner en segundo plano la app se guardan los id
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         val editor = sharedPreferences.edit()
         editor.putLong("ID_TEMPORADA",temporadaId)
@@ -164,11 +170,13 @@ class SeasonList : AppCompatActivity(),BottomSheetTemporada.ModifiedSeason,ViewH
 
     override fun onResume() {
         super.onResume()
+        //Al volver a primer plano se rescatan los id
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         temporadaId = sharedPreferences.getLong("ID_TEMPORADA",0)
         capituloId = sharedPreferences.getLong("ID_EPISODIO",0)
     }
 
+    //Funcion que inicia el recycler view
     private fun iniciar(){
 
         val manager = LinearLayoutManager(this)
@@ -234,6 +242,7 @@ class SeasonList : AppCompatActivity(),BottomSheetTemporada.ModifiedSeason,ViewH
 
     }
 
+    //Si se pulsa el switch de un elemento se modifica los el que se esta viendo actual de temporada y capitulo
     private fun cambiarActivo(){
 
         val cv = ContentValues()
@@ -264,7 +273,7 @@ class SeasonList : AppCompatActivity(),BottomSheetTemporada.ModifiedSeason,ViewH
                 cvS.put("terminada",true)
                 contadorTemporadas++
             }
-            UsoBase.modificarAnime(this,"temporada",cvS,"id="+anime.temporadas[i].id)
+            UsoBase.modificar(this,"temporada",cvS,"id="+anime.temporadas[i].id)
         }
 
         if(ultimaTemporada != -1 && ultimoCapitulo != -1){
@@ -281,11 +290,12 @@ class SeasonList : AppCompatActivity(),BottomSheetTemporada.ModifiedSeason,ViewH
             cv.put("terminado",true)
         }
 
-        UsoBase.modificarAnime(this,"anime",cv,"id="+anime.id)
+        UsoBase.modificar(this,"anime",cv,"id="+anime.id)
 
 
     }
 
+    //Funcion que se llama al acceder a un elemento
     fun accederTemporada(temporada: Temporada,pos: Int,viewPos: Int){
         val intent = Intent(this,EpisodeList::class.java)
         intent.putExtra("DATOS",anime)
@@ -294,12 +304,14 @@ class SeasonList : AppCompatActivity(),BottomSheetTemporada.ModifiedSeason,ViewH
         episodeListResponderLauncher.launch(intent)
     }
 
+    //Funcion que muestra el bottom sheet
     fun mostrarMenu(temporada: Temporada,pos: Int): Boolean{
         val bottomSheet = BottomSheetTemporada(anime,pos)
         bottomSheet.show(supportFragmentManager,"TAG");
         return true
     }
 
+    //Funcion que cambia los datos mostrados segun la barra dse busqueda
     private fun elegirDatos(){
         datosMostrados.clear()
         for(i:Int in 0 until anime.temporadas.size){
@@ -309,6 +321,7 @@ class SeasonList : AppCompatActivity(),BottomSheetTemporada.ModifiedSeason,ViewH
         }
     }
 
+    //Se llama al volver tras modificar una temporada
     override fun returnModifiedData(anime: Anime, season: Int, number: Int) {
         var currentNumber = this.anime.temporadas[season].episodios.size
 
@@ -335,7 +348,7 @@ class SeasonList : AppCompatActivity(),BottomSheetTemporada.ModifiedSeason,ViewH
                         contentValues.put("numero",ep.numeroEpisodio)
                         contentValues.put("visto",ep.visto)
                         contentValues.put("temporada_clave",sl.anime.temporadas[season].id)
-                        UsoBase.insertarAnime(context,"episodio",contentValues)
+                        UsoBase.insertar(context,"episodio",contentValues)
                         sl.anime.temporadas[season].addEpisode(ep);
                         capituloId++
                     }
@@ -358,6 +371,21 @@ class SeasonList : AppCompatActivity(),BottomSheetTemporada.ModifiedSeason,ViewH
 
     }
 
+    //Al pulsar el boton de atras
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+
+        if(keyCode == KeyEvent.KEYCODE_BACK){
+            var intent: Intent = Intent();
+            intent.putExtra("POSITION",posicionAnime);
+            intent.putExtra("ELEMENT",anime);
+            setResult(4,intent);
+            finish();
+        }
+
+        return super.onKeyDown(keyCode, event)
+    }
+
+    //Al borrar un elemento
     override fun returnDeletedData(number: Int) {
 
         val context: Context = this
@@ -383,20 +411,39 @@ class SeasonList : AppCompatActivity(),BottomSheetTemporada.ModifiedSeason,ViewH
 
     }
 
+    //Al cambiar un switch de la temporada
     override fun onSwitchValueChange(value: Boolean, pos: Int,posView:Int) {
 
-        val contentValues = ContentValues()
-        contentValues.put("terminada",value)
-        UsoBase.modificarAnime(this,"temporada",contentValues,"id="+anime.temporadas[pos].id)
-        val contentV = ContentValues()
-        contentV.put("visto",value)
-        UsoBase.modificarAnime(this,"episodio",contentV,"temporada_clave="+anime.temporadas[pos].id)
-        anime.temporadas[pos].finalizada = value
-        for (i: Int in 0 until anime.temporadas[pos].episodios.size){
-            anime.temporadas[pos].episodios[i].visto = value
-        }
+        var contexto: Context = this
 
-        cambiarActivo()
+        val loadMessaje: AlertDialog.Builder = AlertDialog.Builder(this)
+        loadMessaje.setCancelable(false)
+
+        loadMessaje.setView(R.layout.load_modify_season_bar)
+
+        val alert = loadMessaje.create()
+        alert.show()
+
+        GlobalScope.launch(Dispatchers.Main) {
+
+            withContext(Dispatchers.IO){
+                val contentValues = ContentValues()
+                contentValues.put("terminada",value)
+                UsoBase.modificar(contexto,"temporada",contentValues,"id="+anime.temporadas[pos].id)
+                val contentV = ContentValues()
+                contentV.put("visto",value)
+                UsoBase.modificar(contexto,"episodio",contentV,"temporada_clave="+anime.temporadas[pos].id)
+                anime.temporadas[pos].finalizada = value
+                for (i: Int in 0 until anime.temporadas[pos].episodios.size){
+                    anime.temporadas[pos].episodios[i].visto = value
+                }
+
+                cambiarActivo()
+            }
+
+            alert.dismiss()
+
+        }
 
     }
 }

@@ -1,7 +1,7 @@
 package com.example.animelistapp
 
 import android.annotation.SuppressLint
-import android.app.SearchManager
+import android.app.AlertDialog
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -9,18 +9,9 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.Menu
-import android.view.MenuItem
-import android.view.MotionEvent
-import android.view.View
+import android.view.*
 import android.view.inputmethod.InputMethodManager
-import android.widget.CompoundButton
 import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.SearchView
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.animelistapp.Adaptadores.AdaptadorListaEpisodio
@@ -28,16 +19,20 @@ import com.example.animelistapp.Adaptadores.ViewHolderListaEpisodio
 import com.example.animelistapp.Clases.Anime
 import com.example.animelistapp.Clases.Episodio
 import com.example.animelistapp.databinding.ActivityEpisodeListBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class EpisodeList : AppCompatActivity(),ViewHolderListaEpisodio.CheckSwitch {
 
-    private lateinit var binding: ActivityEpisodeListBinding
-    private lateinit var anime: Anime
-    private lateinit var adaptador: AdaptadorListaEpisodio
-    private var datosMostrados: ArrayList<Pair<Int,Episodio>> = arrayListOf()
-    private var posicionTemporada: Int = -1
-    private var posicionVista: Int = -1
-    private var textoBusqueda: String = ""
+    private lateinit var binding: ActivityEpisodeListBinding//Binding de los datos de la vista
+    private lateinit var anime: Anime//Datos
+    private lateinit var adaptador: AdaptadorListaEpisodio//Adaptador del recycler view
+    private var datosMostrados: ArrayList<Pair<Int,Episodio>> = arrayListOf()//Datos mostrados en el recycler view
+    private var posicionTemporada: Int = -1//Temporada mostrada
+    private var posicionVista: Int = -1//Posicion en la vista de temporadas
+    private var textoBusqueda: String = ""//Texto de busqueda
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,39 +47,22 @@ class EpisodeList : AppCompatActivity(),ViewHolderListaEpisodio.CheckSwitch {
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
 
-        /*menuInflater.inflate(R.menu.menu_lista_episodio,menu)
-
-
-        val search = menu?.findItem(R.id.buscarepisodio)
-        val searchView = search?.actionView as SearchView
-        searchView.queryHint = resources.getString(R.string.search)
-        searchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener{
-            /***
-             * When the user is change the search text
-             */
-            override fun onQueryTextChange(p0: String?): Boolean {
-                textoBusqueda = p0!!
-                elegirDatos()
-                adaptador.notifyDataSetChanged()
-                return false
-            }
-
-            /***
-             * User type and press enter at the search bar
-             */
-            override fun onQueryTextSubmit(p0: String?): Boolean {
-                searchView.clearFocus()
-                return false
-            }
-
-
-        })*/
-
-        
-
-
         return super.onCreateOptionsMenu(menu)
 
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+
+        if(keyCode == KeyEvent.KEYCODE_BACK){
+            var intent: Intent = Intent();
+            intent.putExtra("TEMPORADA",posicionTemporada);
+            intent.putExtra("DATOS",anime);
+            intent.putExtra("VIEWPOS",posicionVista)
+            setResult(7,intent);
+            finish();
+        }
+
+        return super.onKeyDown(keyCode, event)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -106,6 +84,7 @@ class EpisodeList : AppCompatActivity(),ViewHolderListaEpisodio.CheckSwitch {
         return super.onOptionsItemSelected(item)
     }
 
+    //Se inicia el recycler view
     private fun iniciar(){
         anime = intent.getParcelableExtra("DATOS")!!
         posicionTemporada = intent.getIntExtra("TEMPORADA",0)
@@ -169,7 +148,7 @@ class EpisodeList : AppCompatActivity(),ViewHolderListaEpisodio.CheckSwitch {
     }
 
 
-
+    //Se cambian los datos
     private fun elegirDatos(){
 
         datosMostrados.clear()
@@ -184,7 +163,7 @@ class EpisodeList : AppCompatActivity(),ViewHolderListaEpisodio.CheckSwitch {
 
     }
 
-
+    //Funcion que se llama al cambiar un switch
     private fun cambiarActivo(){
 
         val cv = ContentValues()
@@ -215,7 +194,7 @@ class EpisodeList : AppCompatActivity(),ViewHolderListaEpisodio.CheckSwitch {
                 cvS.put("terminada",true)
                 contadorTemporadas++
             }
-            UsoBase.modificarAnime(this,"temporada",cvS,"id="+anime.temporadas[i].id)
+            UsoBase.modificar(this,"temporada",cvS,"id="+anime.temporadas[i].id)
         }
 
         if(ultimaTemporada != -1 && ultimoCapitulo != -1){
@@ -232,17 +211,37 @@ class EpisodeList : AppCompatActivity(),ViewHolderListaEpisodio.CheckSwitch {
             cv.put("terminado",true)
         }
 
-        UsoBase.modificarAnime(this,"anime",cv,"id="+anime.id)
+        UsoBase.modificar(this,"anime",cv,"id="+anime.id)
 
 
     }
 
+    //Funcion que se llama al cambiar un switch
     override fun onSwitchChange(valor: Boolean, pos: Int,posView: Int) {
-        anime.temporadas[posicionTemporada].episodios[pos].visto = valor
-        cambiarActivo()
-        val cv = ContentValues()
-        cv.put("visto",valor)
-        UsoBase.modificarAnime(this,"episodio",cv,"id="+anime.temporadas[posicionTemporada].episodios[pos].id)
+
+        var contexto: Context = this
+
+        val loadMessaje: AlertDialog.Builder = AlertDialog.Builder(this)
+        loadMessaje.setCancelable(false)
+
+        loadMessaje.setView(R.layout.load_episode_change)
+
+        val alert = loadMessaje.create()
+        alert.show()
+
+        GlobalScope.launch(Dispatchers.Main) {
+
+            withContext(Dispatchers.IO){
+                anime.temporadas[posicionTemporada].episodios[pos].visto = valor
+                cambiarActivo()
+                val cv = ContentValues()
+                cv.put("visto",valor)
+                UsoBase.modificar(contexto,"episodio",cv,"id="+anime.temporadas[posicionTemporada].episodios[pos].id)
+            }
+
+            alert.dismiss()
+
+        }
 
     }
 }

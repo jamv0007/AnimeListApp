@@ -7,9 +7,6 @@ import android.database.sqlite.SQLiteDatabase
 import android.net.Uri
 import android.os.Environment
 import android.widget.Toast
-import androidx.core.net.toFile
-import androidx.core.net.toUri
-import androidx.documentfile.provider.DocumentFile
 import com.example.animelistapp.Clases.Anime
 import com.example.animelistapp.Clases.Episodio
 import com.example.animelistapp.Clases.Temporada
@@ -20,7 +17,13 @@ import java.io.FileWriter
 
 object UsoBase {
 
-    public fun insertarAnime(context: Context,tabla: String,content: ContentValues){
+    /***
+     * Funcion para insertar en la base de datos
+     * @param context Contexto de la aplicacion
+     * @param tabla Tabla
+     * @param content Content Values con los datos de cada columna
+     */
+    public fun insertar(context: Context, tabla: String, content: ContentValues){
 
         val admin = AdminSQLite(context,"administracion",null,1)
         val base: SQLiteDatabase = admin.writableDatabase
@@ -30,7 +33,12 @@ object UsoBase {
 
     }
 
-    public fun borrarAnime(context: Context,tabla: String,clausula: String){
+    /***
+     * Funcion para borrar de una tabla
+     * @param tabla String con la tabla donde borrar
+     * @param clausula String con la clausula para borrar en esa tabla
+     */
+    public fun borrar(context: Context, tabla: String, clausula: String){
 
         val admin = AdminSQLite(context,"administracion",null,1)
         val base: SQLiteDatabase = admin.writableDatabase
@@ -39,7 +47,14 @@ object UsoBase {
         admin.close()
     }
 
-    public fun modificarAnime(context: Context,tabla: String,content: ContentValues,clausula: String){
+    /***
+     * Funcion para modificar contenido de una tabla
+     * @param context Contexto de la aplicacion
+     * @param tabla Tabla para modificar
+     * @param content Content Value con los datos de las columnas a modificar
+     * @param clausula Clausula para modificar los datos
+     */
+    public fun modificar(context: Context, tabla: String, content: ContentValues, clausula: String){
         val admin = AdminSQLite(context,"administracion",null,1)
         val base: SQLiteDatabase = admin.writableDatabase
         base.update(tabla,content,clausula,null)
@@ -48,12 +63,17 @@ object UsoBase {
     }
 
 
-
+    /***
+     * Funcion que carga los datos desde la base de datos
+     * @param context Contexto de la aplicacion
+     * @throws ArrayList<Anime> Datos de la base de datos
+     */
     public fun cargarDatos(context: Context): ArrayList<Anime>{
 
         val admin = AdminSQLite(context,"administracion",null,1)
         val base: SQLiteDatabase = admin.writableDatabase
 
+        //Se extraen los datos
         val cursor: Cursor = base.rawQuery("select * from anime",null)
         val cursor2: Cursor = base.rawQuery("select * from temporada",null)
         val cursor3: Cursor = base.rawQuery("select * from episodio",null)
@@ -61,7 +81,7 @@ object UsoBase {
         val temporadaLista: ArrayList<Temporada> = arrayListOf()
         val episodioLista: ArrayList<Episodio> = arrayListOf()
 
-
+        //Para cada episodio se añade a la lista
         while (cursor3.moveToNext()){
             var boolean = false
             if(cursor3.getString(2).toInt() == 1){
@@ -72,6 +92,7 @@ object UsoBase {
 
         }
 
+        //Para cada temporada se añade a la lista
         while (cursor2.moveToNext()){
             var boolean2 = false
             if(cursor2.getString(2).toInt() == 1){
@@ -87,7 +108,7 @@ object UsoBase {
         }
 
 
-
+        //Se añade a la lista cada anime
         while (cursor.moveToNext()) {
 
             var viendo = false
@@ -119,17 +140,27 @@ object UsoBase {
 
     }
 
+    /***
+     * Funcion que exporta los datos a csv
+     * @param context Contexto de la aplicacion
+     * @param idAnime El id actual por el que esta el anime añadiendo
+     * @param idTemporada El id actual por el que esta la temporada añadiendo
+     * @param idCapitulo El id por el que esta el capitulo añadiendo
+     */
     public fun exportarDatosCSV(context: Context,idAnime: Long, idTemporada: Long, idCapitulo: Long){
 
+        //Se crea el archivo en documentos
         var root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
         var file = File(root,"DatosApp.csv")
         val filewriter: FileWriter = FileWriter(file)
 
+        //Se accede a la base
         val admin = AdminSQLite(context,"administracion",null,1)
         val base: SQLiteDatabase = admin.writableDatabase
 
         val cursor: Cursor = base.rawQuery("select * from anime",null)
-        
+
+        //Se itera y se añade el id y los datos en filas
         filewriter.append(idAnime.toString())
         filewriter.append("\n")
         while (cursor.moveToNext()){
@@ -191,6 +222,13 @@ object UsoBase {
 
     }
 
+    /***
+     * Funcion para importar los datos de csv
+     * @param contexto Contexto aplicacion
+     * @param ruta Ruta donde esta el csv
+     * @param localizacionImagen Lugar donde se guardan las imagenes
+     * @throws ImportedData Los ids de los elementos
+     */
     public fun importarDatosCSV(contexto: Context, ruta: Uri,localizacionImagen: String): ImportedData{
 
         //Hay que borrar la base y archivos. Despues se inserta en la base y se hace peticion a la base.
@@ -242,7 +280,7 @@ object UsoBase {
                             content.put("capitulo",separador[3].toInt())
                             content.put("viendo",separador[4].toInt())
                             content.put("terminado",separador[5].toInt())
-                            UsoBase.insertarAnime(contexto,"anime",content)
+                            UsoBase.insertar(contexto,"anime",content)
 
                         }
 
@@ -253,7 +291,7 @@ object UsoBase {
                             content.put("numero",separador[1].toInt())
                             content.put("terminada",separador[2].toInt())
                             content.put("anime_clave",separador[3].toLong())
-                            UsoBase.insertarAnime(contexto,"temporada",content)
+                            UsoBase.insertar(contexto,"temporada",content)
 
                         }
 
@@ -264,7 +302,7 @@ object UsoBase {
                             content.put("numero",separador[1].toInt())
                             content.put("visto",separador[2].toInt())
                             content.put("temporada_clave",separador[3].toLong())
-                            UsoBase.insertarAnime(contexto,"episodio",content)
+                            UsoBase.insertar(contexto,"episodio",content)
                         }
                     }
                 }
@@ -289,6 +327,12 @@ object UsoBase {
         return ImportedData(ids[0],ids[1],ids[2])
     }
 
+    /***
+     * Funcion que copia un archivo de un lugar a otro
+     * @param ruta Ruta del archivo
+     * @param directorio Directorio a copiar
+     * @param context Contexto de la aplicacion
+     */
     private fun copiarArchivo(ruta: Uri,directorio: String,context: Context){
 
         val archivo = File(directorio)
@@ -297,6 +341,10 @@ object UsoBase {
 
     }
 
+    /***
+     * Funcion que borra un archivo
+     * @param ruta Ruta del archivo
+     */
     private fun borrarArchivo(ruta: String){
         val file: File = File(ruta)
         file.delete()

@@ -21,9 +21,11 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 class BottomSheetTemporada(private var anime: Anime, private var pos: Int): BottomSheetDialogFragment() {
 
-    private lateinit var listener: ModifiedSeason
+    private lateinit var listener: ModifiedSeason//Instancia de una clase que implemente Modified Season (SeasonList)
+    //Responder a la vista de modificar
     private val modifySeasonResponderLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if(result.resultCode == 6){
+            //Se obtiene el numero de capitulos
             val number = result.data?.getIntExtra("CHAPTERNUMBER",0)
             listener.returnModifiedData(anime, pos,number!!)
             dismiss()
@@ -39,6 +41,7 @@ class BottomSheetTemporada(private var anime: Anime, private var pos: Int): Bott
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
         var view: View = inflater.inflate(R.layout.bottom_sheet_temporada,container,false);
+        //Se instancian los botones de la vista
         val change = view.findViewById<Button>(R.id.modifySeason);
         change.setOnClickListener{
             val intent = Intent(context, AddSeason::class.java)
@@ -90,6 +93,7 @@ class BottomSheetTemporada(private var anime: Anime, private var pos: Int): Bott
 
     }
 
+    //Interfaz para enviar datos a la vista anterior
     public interface ModifiedSeason{
         public fun returnModifiedData(anime: Anime,season: Int,number: Int);
         public fun returnDeletedData(number: Int);

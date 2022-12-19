@@ -24,7 +24,8 @@ import java.io.File
 
 class BottomSheet(private var anime: Anime,private var pos: Int, private var nombres: ArrayList<String>,dir: File): BottomSheetDialogFragment() {
 
-    private lateinit var listener: BottomSheetListener
+    private lateinit var listener: BottomSheetListener//Listener de la clase que implementa BottomSheetListener (Main)
+    //RResult de modificar elemento
     private var modifyLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         //If save, modified the data and close the bottom sheet
         if (result.resultCode == 3) {
@@ -98,6 +99,7 @@ class BottomSheet(private var anime: Anime,private var pos: Int, private var nom
         return view;
     }
 
+    //Interfaz para enviar a la vista anterior
     public interface BottomSheetListener{
         fun onChangeButtonClicked(anime: Anime,pos: Int);
         fun onDeleteButtonClicked(anime: Anime,pos: Int);
